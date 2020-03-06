@@ -4,7 +4,6 @@ from flask import Flask
 from flask import render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, Api
-from marshmallow_sqlalchemy import ModelSchema
 import datetime
 
 

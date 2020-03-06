@@ -3,3 +3,4 @@ requests
 Flask
 Flask-SQLAlchemy
 gunicorn
+flask_restful
