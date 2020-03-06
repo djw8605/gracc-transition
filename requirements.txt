@@ -4,3 +4,4 @@ Flask
 Flask-SQLAlchemy
 gunicorn
 flask_restful
+psycopg2
