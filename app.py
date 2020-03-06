@@ -44,9 +44,9 @@ class Upload(Resource):
         # Get the current time
         now = datetime.datetime.utcnow()
         # Get the token in the header
-        if not request.headers.has_key("Authentication"):
+        if not request.headers.has_key("Authorization"):
             return "No Token", 401
-        token = request.headers.get("Authentication")
+        token = request.headers.get("Authorization")
         token = token.split()[1]
         if token != os.environ['TOKEN']:
             return "Not authorized", 403
