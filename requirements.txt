@@ -1,2 +1,5 @@
 elasticsearch
 requests
+Flask
+Flask-SQLAlchemy
+gunicorn

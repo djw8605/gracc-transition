@@ -12,7 +12,9 @@ def main():
     with open("token.txt", 'r') as token_file:
         token = token_file.read()
     
-    requests.post(UPLOADDEST, r['indices'])
+    headers = {"Authorization": "Bearer {}".format(token)}
+    
+    print(requests.post(UPLOADDEST, r['indices']), headers = headers)
 
 
 if __name__ == "__main__":
