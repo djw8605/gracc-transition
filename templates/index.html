@@ -81,10 +81,31 @@
 
       // Set the progress bars
       // Get an integer percentage
-      docs_progress = Math.floor((gracc2_docs / gracc_docs)*100);
-      size_progress = Math.floor((gracc2_size / gracc_size)*100);
-      $("#summary_docs_progress").css('width', docs_progress+'%').attr("aria-valuenow", docs_progress).text(docs_progress+"%");
-      $("#summary_size_progress").css('width', size_progress+'%').attr("aria-valuenow", size_progress).text(size_progress+"%");
+      var docs_progress = Math.floor((gracc2_docs / gracc_docs)*100);
+      var size_progress = Math.floor((gracc2_size / gracc_size)*100);
+      $("#summary_docs_progress").css('width', docs_progress+'%')
+                                 .attr("aria-valuenow", docs_progress)
+                                 .text(docs_progress+"%");
+      $("#summary_size_progress").css('width', size_progress+'%')
+                                 .attr("aria-valuenow", size_progress)
+                                 .text(size_progress+"%");
+      if (docs_progress < 80) {
+        $("#summary_docs_progress").addClass("bg-danger");
+      } else if (docs_progress < 100) {
+        $("#summary_docs_progress").addClass("bg-warning");
+      } else {
+        $("#summary_docs_progress").addClass("bg-success");
+      }
+
+      if (size_progress < 80) {
+        $("#summary_size_progress").addClass("bg-danger");
+      } else if (size_progress < 100) {
+        $("#summary_size_progress").addClass("bg-warning");
+      } else {
+        $("#summary_size_progress").addClass("bg-success");
+      }
+
+
     }
 
     var mismatched_indexes = [];
