@@ -61,7 +61,7 @@ class Upload(Resource):
 class Download(Resource):
     def get(self, host):
         # Get the latest for a single host
-        uploaded_data = ProbeUpload.query.filter(ProbeUpload.host == host).order_by(ProbeUpload.upload_date)[0]
+        uploaded_data = ProbeUpload.query.filter(ProbeUpload.host == host).order_by(ProbeUpload.upload_date.desc())[0]
         return uploaded_data.data
 
 
