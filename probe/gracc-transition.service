@@ -1,0 +1,17 @@
+[Unit]
+Description=GRACC Transition 
+Documentation=https://opensciencegrid.github.io/gracc
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=root
+Group=root
+Type=simple
+ExecStart=/opt/gracc-transition/venv/bin/python /root/gracc-transition/probe/probe.py gracc.opensciencegrid.org
+WorkingDirectory=/root/indices_dashboard/
+TimeoutStopSec=60
+MemoryLimit=1G
+
+[Install]
+WantedBy=multi-user.target

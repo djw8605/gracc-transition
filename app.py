@@ -53,7 +53,7 @@ class Upload(Resource):
         token = token.split()[1]
         if token != os.environ['TOKEN']:
             return "Not authorized", 403
-        
+
         # Process the uploaded data
         new_doc = {}
         received_doc = json.loads(request.json)
@@ -66,7 +66,15 @@ class Upload(Resource):
         upload = ProbeUpload(now, host, new_doc)
         db.session.add(upload)
         db.session.commit()
+        Upload.delete_expired()
         return 'created'
+
+    @classmethod
+    def delete_expired(cls):
+        expiration_days = 181
+        limit = datetime.datetime.now() - datetime.timedelta(days=expiration_days)
+        cls.query.filter(cls.upload_date <= limit).delete()
+        db.session.commit()
 
 class Download(Resource):
     def get(self, host):
