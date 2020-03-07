@@ -53,8 +53,17 @@ class Upload(Resource):
         token = token.split()[1]
         if token != os.environ['TOKEN']:
             return "Not authorized", 403
+        
+        # Process the uploaded data
+        new_doc = {}
+        received_doc = json.loads(request.json)
+        for key in received_doc.keys():
+            new_doc[key] = {
+                'size': received_doc[key]['total']['store']['size_in_bytes'],
+                'doc_count': received_doc[key]['primaries']['docs']['count']
+            }
 
-        upload = ProbeUpload(now, host, json.loads(request.json))
+        upload = ProbeUpload(now, host, new_doc)
         db.session.add(upload)
         db.session.commit()
         return 'created'
@@ -63,7 +72,7 @@ class Download(Resource):
     def get(self, host):
         # Get the latest for a single host
         uploaded_data = ProbeUpload.query.filter(ProbeUpload.host == host).order_by(ProbeUpload.upload_date.desc())[0]
-        return json.dumps(uploaded_data.data)
+        return uploaded_data.data
 
 
 @app.route('/')

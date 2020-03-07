@@ -16,7 +16,6 @@ def main():
         token = token_file.read()
     
     headers = {"Authorization": "Bearer {}".format(token.strip())}
-    print(json.dumps(r['indices']))
     
     print(requests.post(UPLOADDEST, json=json.dumps(r['indices']), headers=headers))
 
