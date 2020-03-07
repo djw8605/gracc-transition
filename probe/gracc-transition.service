@@ -8,8 +8,8 @@ After=network-online.target
 User=root
 Group=root
 Type=simple
-ExecStart=/opt/gracc-transition/venv/bin/python /root/gracc-transition/probe/probe.py gracc.opensciencegrid.org
-WorkingDirectory=/root/indices_dashboard/
+ExecStart=/bin/python /opt/gracc-transition/probe/probe.py gracc.opensciencegrid.org
+WorkingDirectory=/opt/gracc-transition/probe
 TimeoutStopSec=60
 MemoryLimit=1G
 
