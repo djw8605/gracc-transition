@@ -42,10 +42,11 @@
 
     function removeIgnored(indexes) {
       res = [
-        /^osg*/,
-        /^ps_*/,
-        /^shrink\-ps_*/,
-        /^glidein*/
+        /^osg.*/,
+        /^ps_.*/,
+        /^shrink\-ps_.*/,
+        /^glidein.*/,
+        /^\..*/
       ];
       var keys = Object.keys(indexes);
       for (var key in keys) {
