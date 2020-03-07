@@ -18,6 +18,11 @@
   integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
   crossorigin="anonymous"></script>
 
+  <script
+  src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+  <script
+  src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+
   <script>
     $(document).ready(function() {
         // Get both of the data sets
@@ -114,6 +119,7 @@
 
       $("#missing_indexes").text(missing_indexes);
       $("#mismatch_indexes").text(mismatched_index);
+      $("#index_table").DataTable({"paging": false});
     }
 
     function addIndexRow(index_name, gracc_size, gracc2_size, difference) {
@@ -141,6 +147,8 @@
 
       document.body.removeChild(element);
     }
+
+
   </script>
 
 </head>
