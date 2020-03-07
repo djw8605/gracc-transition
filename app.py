@@ -40,6 +40,13 @@ class ProbeUpload(db.Model):
         self.upload_date = upload_date
         self.data = data
         self.host = host
+    
+    @classmethod
+    def delete_expired(cls):
+        expiration_days = 1
+        limit = datetime.datetime.now() - datetime.timedelta(days=expiration_days)
+        cls.query.filter(cls.upload_date <= limit).delete()
+        db.session.commit()
 
 class Upload(Resource):
 
@@ -66,15 +73,9 @@ class Upload(Resource):
         upload = ProbeUpload(now, host, new_doc)
         db.session.add(upload)
         db.session.commit()
-        Upload.delete_expired()
+        ProbeUpload.delete_expired()
         return 'created'
 
-    @classmethod
-    def delete_expired(cls):
-        expiration_days = 181
-        limit = datetime.datetime.now() - datetime.timedelta(days=expiration_days)
-        cls.query.filter(cls.upload_date <= limit).delete()
-        db.session.commit()
 
 class Download(Resource):
     def get(self, host):
