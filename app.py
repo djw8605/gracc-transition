@@ -5,6 +5,7 @@ from flask import render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, Api
 import datetime
+import json
 
 
 app = Flask(__name__)
@@ -53,7 +54,7 @@ class Upload(Resource):
         if token != os.environ['TOKEN']:
             return "Not authorized", 403
 
-        upload = ProbeUpload(now, host, request.json)
+        upload = ProbeUpload(now, host, json.loads(request.json))
         db.session.add(upload)
         db.session.commit()
         return 'created'
@@ -62,7 +63,7 @@ class Download(Resource):
     def get(self, host):
         # Get the latest for a single host
         uploaded_data = ProbeUpload.query.filter(ProbeUpload.host == host).order_by(ProbeUpload.upload_date.desc())[0]
-        return uploaded_data.data
+        return json.dumps(uploaded_data.data)
 
 
 @app.route('/')
