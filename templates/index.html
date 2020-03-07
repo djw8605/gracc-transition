@@ -13,6 +13,135 @@
   <!-- Bootstrap core CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+  <script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+
+  <script>
+    $(document).ready(function() {
+        // Get both of the data sets
+        $.when(
+          $.getJSON("/download/gracc.opensciencegrid.org/"),
+          $.getJSON("/download/hcc-gracc.unl.edu")
+        ).then(
+          (gracc, gracc2) => {
+            gracc = removeIgnored(gracc[0]);
+            gracc2 = removeIgnored(gracc2[0]);
+            summaryStats(gracc, gracc2);
+            findDifferences(gracc, gracc2);
+          }
+        )
+
+      });
+
+    function removeIgnored(indexes) {
+      res = [
+        /^osg*/,
+        /^ps_*/,
+        /^shrink\-ps_*/,
+        /^glidein*/
+      ];
+      var keys = Object.keys(indexes);
+      for (var key in keys) {
+        index = keys[key];
+        
+        for (re in res) {
+          if (res[re].test(index)) {
+            console.log("Deleting: " + index)
+            delete indexes[index]
+          }
+        }
+      }
+      return indexes
+    }
+
+    function summaryStats(gracc, gracc2) {
+      // Count all the documents and size of both
+      gracc_docs = 0;
+      gracc_size = 0;
+      gracc2_docs = 0;
+      gracc2_size = 0;
+      var keys = Object.keys(gracc);
+      for (var key in keys) {
+        gracc_docs += gracc[keys[key]]['doc_count'];
+        gracc_size += gracc[keys[key]]['size'];
+      }
+      var keys = Object.keys(gracc2);
+      for (var key in keys) {
+        gracc2_docs += gracc2[keys[key]]['doc_count'];
+        gracc2_size += gracc2[keys[key]]['size'];
+      }
+
+      // Set the progress bars
+      // Get an integer percentage
+      docs_progress = Math.floor((gracc2_docs / gracc_docs)*100);
+      size_progress = Math.floor((gracc2_size / gracc_size)*100);
+      $("#summary_docs_progress").css('width', docs_progress+'%').attr("aria-valuenow", docs_progress).text(docs_progress+"%");
+      $("#summary_size_progress").css('width', size_progress+'%').attr("aria-valuenow", size_progress).text(size_progress+"%");
+    }
+
+    var mismatched_indexes = [];
+    function findDifferences(gracc, gracc2) {
+      missing_indexes = 0;
+      mismatched_index = 0;
+      var keys = Object.keys(gracc);
+      for (key in keys) {
+        index = keys[key];
+        if (gracc2.hasOwnProperty(index)) {
+          if (gracc[index].doc_count != gracc2[index].doc_count) {
+            console.log("Index " + index + " not the same");
+            addIndexRow(index, gracc[index].doc_count, gracc2[index].doc_count, gracc[index].doc_count - gracc2[index].doc_count);
+            mismatched_index += 1;
+            mismatched_indexes.push(index);
+          }
+        } else {
+          addIndexRow(index, gracc[index].doc_count, "Missing", "Missing");
+          console.log("Index " + index + " is missing in gracc2");
+          missing_indexes += 1;
+          mismatched_indexes.push(index);
+        }
+
+      }
+
+      keys = Object.keys(gracc2);
+      for (key in keys) {
+        index = keys[key];
+        if (!gracc.hasOwnProperty(index)) {
+          console.log("Index " + index + " is missing in gracc, docs: " + gracc2[index]['doc_count']);
+        }
+      }
+
+      $("#missing_indexes").text(missing_indexes);
+      $("#mismatch_indexes").text(mismatched_index);
+    }
+
+    function addIndexRow(index_name, gracc_size, gracc2_size, difference) {
+      var newRow = $("<tr>");
+      var cols = "";
+
+      cols += '<td>' + index_name + '</td>';
+      cols += '<td>' + gracc_size + '</td>';
+      cols += '<td>' + gracc2_size + '</td>';
+      cols += '<td>' + difference + '</td>';
+
+      newRow.append(cols);
+      $("#index_table").append(newRow);
+    }
+
+    function downloadMismatched() {
+      var element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(mismatched_indexes.join("\n")));
+      element.setAttribute('download', "mismatched.txt");
+
+      element.style.display = 'none';
+      document.body.appendChild(element);
+
+      element.click();
+
+      document.body.removeChild(element);
+    }
+  </script>
 
 </head>
 
@@ -26,27 +155,78 @@
   </nav>
 
   <!-- Page Content -->
+  <div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-4">GRACC Transition Status</h1>
+      <p class="lead">This page shows the status of the GRACC transition by comparing the similuarity of GRACC and GRACC2</p>
+    </div>
+  </div>
+
   <div class="container">
     <div class="row">
-      <div class="col-lg-12">
-        <h1 class="mt-5">GRACC Transition Status</h1>
-        <p class="lead">This page shows the status of the GRACC transition by comparing the similuarity of GRACC and GRACC2</p>
-        <h5>Definition of Terms</h5>
-        <dl class="row">
-          <dt class="col-sm-3">Document</dt>
-          <dd class="col-sm-9">All data with an Elasticsearch database is stored within a Document.</dd>
-        </dl>
+      <div class="col-lg-8">
+        <p>
+          <h5>Document Progress</h5>
+          <div class="progress" style="height: 20px;">
+            <div class="progress-bar" id="summary_docs_progress" role="progressbar" style="width: 100%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </p>
+        <p>
+          <h5>Size Progress</h5>
+          <div class="progress" style="height: 20px;">
+            <div class="progress-bar" id="summary_size_progress" role="progressbar" style="width: 100%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </p>
+      </div>
+      <div class="col-lg-4">
+        <table class="table">
+          <thead>
+            <th colspan="2">
+              Summary Stats
+            </th>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Missing Indexes</td>
+              <td><span id="missing_indexes"></span></td>
+            </tr>
+            <tr>
+              <td>Mismatch Indexes</td>
+              <td><span id="mismatch_indexes"></span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
     <div class="row">
-      <div class="col-lg-8">
-        <h2>Summary of Transition</h2>
+      <div class="col-lg-12">
+        <h3>Index Differences in GRACC</h3>
+        <p>
+          <button type="button" class="btn btn-primary" onclick="downloadMismatched();">Download mismatched indexes</button>
+        </p>
+        <table class="table" id="index_table">
+          <thead>
+            <th>
+              Index
+            </th>
+            <th>
+              GRACC Docs
+            </th>
+            <th>
+              GRACC2 Docs
+            </th>
+            <th>
+              Difference (GRACC - GRACC2)
+            </th>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
   <!-- Bootstrap core JavaScript -->
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   
