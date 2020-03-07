@@ -32,6 +32,7 @@ class User(db.Model):
 class ProbeUpload(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     upload_date = db.Column(db.DateTime)
+    host = db.Column(db.Text)
     data = db.Column(db.JSON)
 
     def __init__(self, upload_date, data):
@@ -56,6 +57,11 @@ class Upload(Resource):
         db.session.commit()
         return 'created'
 
+class Download(Resource):
+    def get(self, host):
+        # Get the latest for a single host
+        uploaded_data = ProbeUpload.query.filter(ProbeUpload.host == host).order_by(ProbeUpload.upload_date)[0]
+        return uploaded_data.data
 
 
 @app.route('/')
@@ -70,6 +76,7 @@ def robots():
     return res
 
 api.add_resource(Upload, '/upload/<host>/')
+api.add_resource(Download, '/download/<host>/')
 
 
 if __name__ == '__main__':
