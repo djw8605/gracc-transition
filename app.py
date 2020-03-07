@@ -35,9 +35,10 @@ class ProbeUpload(db.Model):
     host = db.Column(db.Text)
     data = db.Column(db.JSON)
 
-    def __init__(self, upload_date, data):
+    def __init__(self, upload_date, host, data):
         self.upload_date = upload_date
         self.data = data
+        self.host = host
 
 class Upload(Resource):
 
@@ -52,7 +53,7 @@ class Upload(Resource):
         if token != os.environ['TOKEN']:
             return "Not authorized", 403
 
-        upload = ProbeUpload(now, request.form)
+        upload = ProbeUpload(now, host, request.form)
         db.session.add(upload)
         db.session.commit()
         return 'created'
