@@ -53,7 +53,7 @@ class Upload(Resource):
         if token != os.environ['TOKEN']:
             return "Not authorized", 403
 
-        upload = ProbeUpload(now, host, request.form)
+        upload = ProbeUpload(now, host, request.json)
         db.session.add(upload)
         db.session.commit()
         return 'created'

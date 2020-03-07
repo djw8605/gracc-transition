@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import requests
+import json
 from elasticsearch import Elasticsearch
 
 
@@ -16,7 +17,7 @@ def main():
     
     headers = {"Authorization": "Bearer {}".format(token.strip())}
     
-    print(requests.post(UPLOADDEST, data=r['indices'], headers=headers))
+    print(requests.post(UPLOADDEST, json=json.dumps(r['indices']), headers=headers))
 
 
 if __name__ == "__main__":
