@@ -17,19 +17,6 @@ db = SQLAlchemy(app)
 api = Api(app)
 
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
-    email = db.Column(db.String(120), unique=True)
-
-    def __init__(self, name, email):
-        self.name = name
-        self.email = email
-
-    def __repr__(self):
-        return '<Name %r>' % self.name
-
-
 class ProbeUpload(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     upload_date = db.Column(db.DateTime)
@@ -81,7 +68,7 @@ class Download(Resource):
     def get(self, host):
         # Get the latest for a single host
         uploaded_data = ProbeUpload.query.filter(ProbeUpload.host == host).order_by(ProbeUpload.upload_date.desc())[0]
-        return uploaded_data.data
+        return {'data': uploaded_data.data, 'updated_at': uploaded_data.upload_date.isoformat()}
 
 
 @app.route('/')

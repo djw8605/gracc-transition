@@ -31,14 +31,27 @@
           $.getJSON("/download/hcc-gracc.unl.edu")
         ).then(
           (gracc, gracc2) => {
-            gracc = removeIgnored(gracc[0]);
-            gracc2 = removeIgnored(gracc2[0]);
+            var gracc_update = gracc[0].updated_at;
+            var gracc2_update = gracc2[0].updated_at;
+            gracc = removeIgnored(gracc[0].data);
+            gracc2 = removeIgnored(gracc2[0].data);
             summaryStats(gracc, gracc2);
             findDifferences(gracc, gracc2);
+            displayUpdated(gracc_update, gracc2_update);
           }
         )
 
       });
+
+    function displayUpdated(gracc_update, gracc2_update) {
+      var gracc_date = Date.parse(gracc_update + "Z");
+      var gracc2_date = Date.parse(gracc2_update + "Z");
+      var now = Date.now();
+      var gracc_difference_min = Math.floor((now - gracc_date) / (1000 * 60 ));
+      var gracc2_difference_min = Math.floor((now - gracc2_date) / (1000 * 60 ));
+      $("#gracc_updated").text(gracc_difference_min + " Minutes");
+      $("#gracc2_updated").text(gracc2_difference_min + " Minutes");
+    }
 
     function removeIgnored(indexes) {
       res = [
@@ -181,6 +194,12 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
     <div class="container">
       <a class="navbar-brand" href="#">GRACC Transition</a>
+      <span class="navbar-text">
+        GRACC: <span id="gracc_updated"></span> Ago
+      </span>
+      <span class="navbar-text">
+        GRACC2: <span id="gracc2_updated"></span> Ago
+      </span>
     </div>
   </nav>
 
