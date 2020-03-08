@@ -70,10 +70,26 @@ class Download(Resource):
         uploaded_data = ProbeUpload.query.filter(ProbeUpload.host == host).order_by(ProbeUpload.upload_date.desc())[0]
         return {'data': uploaded_data.data, 'updated_at': uploaded_data.upload_date.isoformat()}
 
+class DataSummary(Resource):
+    def get(self):
+        # Get the latest for a single host
+        uploaded_data = ProbeUpload.query.order_by(ProbeUpload.upload_date.desc())
+        returned_data = {'data': []}
+        for upload in uploaded_data:
+            returned_data['data'].append({'date': upload.upload_date.isoformat(), 
+                                          'host': upload.host, 
+                                          'datasize': len(json.dumps(upload.data))})
+
+        return returned_data
+
 
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/data')
+def data():
+    return render_template('data.html')
 
 
 @app.route('/robots.txt')
@@ -84,6 +100,7 @@ def robots():
 
 api.add_resource(Upload, '/upload/<host>/')
 api.add_resource(Download, '/download/<host>/')
+api.add_resource(DataSummary, '/datasummary')
 
 
 if __name__ == '__main__':
